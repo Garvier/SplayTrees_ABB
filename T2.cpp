@@ -77,66 +77,117 @@ class splayTree{
         };
     private:
         Node* root;
-        void zigzig(Node* node) {
+        // Rotación Zig-zig
+        void zigzig(Node*& node) {
             Node* parent = node->left;
+            Node* grandparent = parent->left;
+            
+            parent->left = grandparent->right;
+            grandparent->right = parent;
             node->left = parent->right;
             parent->right = node;
-            node = parent;
-        };
-        void zigzag(Node* node) {
+            
+            node = grandparent;
+        }
+
+        // Rotación Zig-zag
+        void zigzag(Node*& node) {
             Node* parent = node->left;
             Node* grandparent = parent->right;
+
             parent->right = grandparent->left;
             grandparent->left = parent;
             node->left = grandparent->right;
             grandparent->right = node;
+
             node = grandparent;
-        };
-        void zagzig(Node* node) {
+        }
+
+        // Rotación Zag-zig
+        void zagzig(Node*& node) {
             Node* parent = node->right;
             Node* grandparent = parent->left;
+
             parent->left = grandparent->right;
             grandparent->right = parent;
             node->right = grandparent->left;
             grandparent->left = node;
+
             node = grandparent;
-        };
-        void zagzag(Node* node) {
+        }
+
+        // Rotación Zag-zag
+        void zagzag(Node*& node) {
+            Node* parent = node->right;
+            Node* grandparent = parent->right;
+
+            parent->right = grandparent->left;
+            grandparent->left = parent;
+            node->right = parent->left;
+            parent->left = node;
+
+            node = grandparent;
+        }
+
+        // Rotación Zig (cuando el padre es la raíz)
+        void zig(Node*& node) {
+            Node* parent = node->left;
+            node->left = parent->right;
+            parent->right = node;
+            node = parent;
+        }
+
+        // Rotación Zag (cuando el padre es la raíz)
+        void zag(Node*& node) {
             Node* parent = node->right;
             node->right = parent->left;
             parent->left = node;
             node = parent;
-        };
+        }
 
-        void splay(Node* node, int value) {
-            if (node == nullptr) {
+
+        void splay(Node*& node, int value) {
+            if (node == nullptr || node->value == value) {
                 return;
             }
-            if (node->value == value) {
-                return;
-            }
+
             if (value < node->value) {
+                if (node->left == nullptr) {
+                    return;
+                }
+
                 if (node->left->value == value) {
+                    zig(node);
+                } else if (node->left->left != nullptr && node->left->left->value == value) {
                     zigzig(node);
-                } else if (node->left->left->value == value) {
-                    zigzig(node->left);
+                } else if (node->left->right != nullptr && node->left->right->value == value) {
                     zigzag(node);
                 } else {
-                    splay(node->left->left, value);
-                    zigzag(node);
+                    splay(node->left, value);
+                    if (node->left != nullptr) {
+                        zig(node);
+                    }
                 }
             } else {
+                if (node->right == nullptr) {
+                    return;
+                }
+
                 if (node->right->value == value) {
+                    zag(node);
+                } else if (node->right->right != nullptr && node->right->right->value == value) {
                     zagzag(node);
-                } else if (node->right->right->value == value) {
-                    zagzag(node->right);
+                } else if (node->right->left != nullptr && node->right->left->value == value) {
                     zagzig(node);
                 } else {
-                    splay(node->right->right, value);
-                    zagzig(node);
+                    splay(node->right, value);
+                    if (node->right != nullptr) {
+                        zag(node);
+                    }
                 }
             }
-        };
+        }
+
 
         Node* insert(Node* node, int value) {
             if (node == nullptr) {

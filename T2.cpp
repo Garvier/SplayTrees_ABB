@@ -1,6 +1,8 @@
 #include<iostream>
 using namespace std;
-
+#include <vector>
+#include <algorithm>
+#include <bits/stdc++.h>
 
 struct Node {
     int value;
@@ -202,62 +204,27 @@ class splayTree{
 };
 
 int main() {
-    // Probando ABB
-    cout << "Probando ABB:" << endl;
-    ABB abbTree;
+    int N;
+    cin >> N;
+    int M;
+    cin >> M;
+    ABB abb;
+    splayTree splay;
+    vector<int> N_values;
+    vector<int> M_values;
+    // inserta N valores en N_values
+    for (int i = 0; i < N; i++) {
+        int value = rand();
+        N_values.push_back(value);
+    }
+    int buscar = M/N;
+    // inserta N/M veces los valores de N_values en M_values
+    for (int i = 0; i < M; i++) {
+        M_values.push_back(N_values[i%buscar]);
+    }
+    //permutacion aleatoria de M_values
+    random_shuffle(M_values.begin(), M_values.end());
 
-    // Insertar valores en el ABB
-    abbTree.insert(5);
-    abbTree.insert(3);
-    abbTree.insert(7);
-    abbTree.insert(2);
-    abbTree.insert(4);
-    abbTree.insert(6);
-    abbTree.insert(8);
 
-    // Intentar insertar valores duplicados
-    abbTree.insert(5);
-    abbTree.insert(3);
-    abbTree.insert(7);
 
-    // Imprimir el ABB
-    cout << "Elementos del ABB en orden: ";
-    abbTree.print();
-    cout << endl;
-
-    // Buscar algunos valores
-    cout << "Buscar 4 en ABB: " << (abbTree.search(4) ? "Encontrado" : "No encontrado") << endl;
-    cout << "Buscar 9 en ABB: " << (abbTree.search(9) ? "Encontrado" : "No encontrado") << endl;
-
-    // Probando splayTree
-    cout << "\nProbando splayTree:" << endl;
-    splayTree splayTree;
-
-    // Insertar valores en el splayTree
-    splayTree.insert(5);
-    splayTree.insert(3);
-    splayTree.insert(7);
-    splayTree.insert(2);
-    splayTree.insert(4);
-    splayTree.insert(6);
-    splayTree.insert(8);
-
-    // Intentar insertar valores duplicados
-    splayTree.insert(5);
-    splayTree.insert(3);
-    splayTree.insert(7);
-
-    // Imprimir el splayTree
-    cout << "Elementos del splayTree en orden: ";
-    splayTree.print();
-    cout << endl;
-
-    // Buscar algunos valores
-    cout << "Buscar 4 en splayTree: " << (splayTree.search(4) ? "Encontrado" : "No encontrado") << endl;
-    splayTree.print(); // Imprimir después de splay para ver el cambio en la estructura
-
-    cout << "Buscar 9 en splayTree: " << (splayTree.search(9) ? "Encontrado" : "No encontrado") << endl;
-    splayTree.print(); // Imprimir después de intento de búsqueda
-
-    return 0;
 }

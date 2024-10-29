@@ -223,8 +223,19 @@ int main() {
         M_values.push_back(N_values[i%buscar]);
     }
     //permutacion aleatoria de M_values
-    random_shuffle(M_values.begin(), M_values.end());
+    shuffle( M_values.begin(), M_values.end(), default_random_engine(0));
 
-
+    // inserta los valores de N_values en los arboles
+    for (int i = 0; i < N; i++) {
+        abb.insert(N_values[i]);
+        splay.insert(N_values[i]);
+    }
+    // busca los valores de M_values en los arboles
+    for (int i = 0; i < M; i++) {
+        abb.search(M_values[i]);
+        splay.search(M_values[i]);
+    }
+    
+    return 0;
 
 }

@@ -26,6 +26,16 @@ class ABB{
         void print() {
             print(root);
         };
+        void experimentar1(const vector<int>& N_values, const vector<int>& M_values) {
+            
+            for (int value : N_values) {
+                insert(value);
+            }
+            
+            for (int value : M_values) {
+                search(value);
+            }
+    }
     private:
         Node* root;
         Node* insert(Node* node, int value) {
@@ -59,6 +69,7 @@ class ABB{
             cout << node->value << " ";
             print(node->right);
         };
+
 };
 
 
@@ -77,6 +88,16 @@ class splayTree{
         };
         void print() {
             print(root);
+        };
+        void experimentar1(const vector<int>& N_values, const vector<int>& M_values) {
+
+            for (int value : N_values) {
+                insert(value);
+            }
+            // Realizar las búsquedas
+            for (int value : M_values) {
+                search(value);
+            }
         };
     private:
     Node* root;
@@ -204,38 +225,27 @@ class splayTree{
 };
 
 int main() {
-    int N;
-    cin >> N;
-    int M;
-    cin >> M;
+    int N, M;
+    cin >> N >> M;
+
     ABB abb;
     splayTree splay;
-    vector<int> N_values;
-    vector<int> M_values;
-    // inserta N valores en N_values
-    for (int i = 0; i < N; i++) {
-        int value = rand();
-        N_values.push_back(value);
-    }
-    int buscar = M/N;
-    // inserta N/M veces los valores de N_values en M_values
-    for (int i = 0; i < M; i++) {
-        M_values.push_back(N_values[i%buscar]);
-    }
-    //permutacion aleatoria de M_values
-    shuffle( M_values.begin(), M_values.end(), default_random_engine(0));
+    vector<int> N_values, M_values;
 
-    // inserta los valores de N_values en los arboles
     for (int i = 0; i < N; i++) {
-        abb.insert(N_values[i]);
-        splay.insert(N_values[i]);
+        N_values.push_back(rand());
     }
-    // busca los valores de M_values en los arboles
+
+    int buscar = M / N;
     for (int i = 0; i < M; i++) {
-        abb.search(M_values[i]);
-        splay.search(M_values[i]);
+        M_values.push_back(N_values[i % buscar]);
     }
-    
+
+    shuffle(M_values.begin(), M_values.end(), default_random_engine(0));
+
+    // Ejecuta la experimentación en ambos árboles
+    abb.experimentar1(N_values, M_values);
+    splay.experimentar1(N_values, M_values);
+
     return 0;
-
 }

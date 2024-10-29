@@ -12,8 +12,13 @@ struct Node {
 
     Node(int val) : value(val), left(nullptr), right(nullptr), parent(nullptr) {}
 };
-double f(int i){
-    return 1.0 /(i+1);
+double f(int i, int N){
+    float x = 0.0;
+    for(int j = 0; j < N; j++){
+        x += 1/pow(i+1,2);
+    }
+    double C=1/x;
+    return C/pow(i+1,2);
 }
 
 void primerExperimento(int N, int M) {
@@ -56,7 +61,7 @@ void segundoExperimento(int N, int M){
         splay.insert(x);
     }
     for(int i = 0; i < M; i++){
-        int x= floor(f(i)*N);
+        int x= floor(f(i,N)*N);
         for(int j = 0; j < x; j++){
             B.push_back(N_values[j]);
         }
@@ -68,6 +73,31 @@ void segundoExperimento(int N, int M){
     }
 }
 
+void tercerExperimento(int N, int M){
+    ABB abb;
+    splayTree splay;
+    vector<int> N_values, M_values;
+    for(int i = 0; i < N; i++){
+        int x = rand();
+        N_values.push_back(x);  
+    }
+    sort(N_values.begin(), N_values.end());
+    for(int i = 0; i < M; i++){
+        abb.insert(N_values[i]);
+        splay.insert(N_values[i]);
+    }
+    int buscar = M / N;
+    for (int i = 0; i < M; i++) {
+        M_values.push_back(N_values[i % buscar]);
+    }
+    shuffle(M_values.begin(), M_values.end(), default_random_engine(0));
+    for (int i = 1; i <= M; i++) {
+        abb.search(i);
+        splay.search(i);
+    }
+
+
+}
 
 
 class ABB{

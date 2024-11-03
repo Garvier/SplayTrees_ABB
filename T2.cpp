@@ -1,4 +1,5 @@
 #include<iostream>
+#include <chrono>
 using namespace std;
 #include <vector>
 #include <algorithm>
@@ -226,6 +227,8 @@ void primerExperimento(int N, int M) {
     splayTree splay;
     vector<int> N_values, M_values;
 
+    auto start = chrono::high_resolution_clock::now();
+
     // Generar N valores aleatorios y insertarlos en los árboles
     for (int i = 0; i < N; i++) {
         int x = rand();
@@ -256,10 +259,15 @@ void primerExperimento(int N, int M) {
         abb.search(M_values[i]);
         splay.search(M_values[i]);
     }
+    auto end = chrono::high_resolution_clock::now();
+        cout << "Tiempo primer experimento: " 
+             << chrono::duration_cast<chrono::milliseconds>(end - start).count() 
+             << " ms" << endl;
 }
 
 
 void segundoExperimento(int N, int M) {
+    auto start = chrono::high_resolution_clock::now();
     ABB abb;
     splayTree splay;
     vector<int> N_values, B;
@@ -289,6 +297,10 @@ void segundoExperimento(int N, int M) {
         abb.search(B[i]);
         splay.search(B[i]);
     }
+    auto end = chrono::high_resolution_clock::now();
+        cout << "Tiempo segundo experimento: " 
+             << chrono::duration_cast<chrono::milliseconds>(end - start).count() 
+             << " ms" << endl;
 }
 
 
@@ -296,6 +308,7 @@ void tercerExperimento(int N, int M) {
     ABB abb;
     splayTree splay;
     vector<int> N_values, M_values;
+    auto start = chrono::high_resolution_clock::now();
 
     // Generar N valores aleatorios
     for (int i = 0; i < N; i++) {
@@ -331,10 +344,15 @@ void tercerExperimento(int N, int M) {
         abb.search(M_values[i]);
         splay.search(M_values[i]);
     }
+    auto end = chrono::high_resolution_clock::now();
+        cout << "Tiempo tercer experimento: " 
+             << chrono::duration_cast<chrono::milliseconds>(end - start).count() 
+             << " ms" << endl;
 }
 
 
 void cuartoExperimento(int N, int M) {
+    auto start = chrono::high_resolution_clock::now();
     ABB abb;
     splayTree splay;
     vector<int> A_values, C_values, M_values;
@@ -372,14 +390,24 @@ void cuartoExperimento(int N, int M) {
         abb.search(M_values[i]);
         splay.search(M_values[i]);
     }
+    auto end = chrono::high_resolution_clock::now();
+        cout << "Tiempo cuarto experimento: " 
+             << chrono::duration_cast<chrono::milliseconds>(end - start).count() 
+             << " ms" << endl;
 }
 
 int main() {
     // Ejecuta la experimentación en ambos árboles
     // falta generar los N y el calculo de las ejecuciones de cada una
+    
     primerExperimento(1000, 10000);
+ 
     segundoExperimento(1000, 10000);
+    
     tercerExperimento(1000, 10000);
+    
     cuartoExperimento(1000, 10000);
+    
+    printf("Finalizado\n");
     return 0;
 }

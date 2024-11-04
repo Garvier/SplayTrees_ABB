@@ -299,6 +299,8 @@ Metrics primerExperimento(int N, int M)
     splayTree splay;
     vector<int> N_values, M_values;
 
+    auto start = chrono::high_resolution_clock::now();
+
     // Generar N valores aleatorios y insertarlos en los árboles
     for (int i = 0; i < N; i++)
     {
@@ -455,6 +457,7 @@ Metrics tercerExperimento(int N, int M)
     ABB abb;
     splayTree splay;
     vector<int> N_values, M_values;
+    auto start = chrono::high_resolution_clock::now();
     auto start = chrono::high_resolution_clock::now();
 
     // Generar N valores aleatorios

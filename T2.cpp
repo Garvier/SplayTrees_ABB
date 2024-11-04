@@ -457,8 +457,6 @@ Metrics tercerExperimento(int N, int M)
     ABB abb;
     splayTree splay;
     vector<int> N_values, M_values;
-    auto start = chrono::high_resolution_clock::now();
-    auto start = chrono::high_resolution_clock::now();
 
     // Generar N valores aleatorios
     for (int i = 0; i < N; i++)

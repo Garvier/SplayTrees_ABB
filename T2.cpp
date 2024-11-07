@@ -581,7 +581,21 @@ Metrics cuartoExperimento(int N, int M)
     return guardarMetricas(tBusquedaABB, tBusquedaSplay);
 }
 
-Metrics busquedaPrimerExperimento(ABB abb, splayTree splay, vector<int> B)
+// Funcion auxiliar para crear el vector B de la forma M/N
+vector<int> generarVectorB(vector<int> A, int N, int M)
+{
+    vector<int> B;
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = 0; j < M / N; j++)
+        {
+            B.push_back(A[i]);
+        }
+    }
+    return B;
+}
+
+Metrics busquedaExperimento(ABB abb, splayTree splay, vector<int> B)
 {
     auto start_search_ABB = chrono::high_resolution_clock::now();
     for (int i = 0; i < B.size(); i++)
@@ -602,18 +616,20 @@ Metrics busquedaPrimerExperimento(ABB abb, splayTree splay, vector<int> B)
     return guardarMetricas(tBusquedaABB, tBusquedaSplay);
 }
 
-void ejecutarExperimentos(int N, int M)
+vector<Metrics> ejecutarExperimentos(int N, int M)
 {
+
+    cout << "=== PREPARANDO ARBOLES 1 Y 2 ===" << endl;
     // Generar vector A y el vector B
     vector<int> A;
-    vector<int> B;
-    vector<int> Bprob;
+    vector<int> B;     // B es el vector que se usará en los experimentos 1 y 3
+    vector<int> Bprob; // Bprob es el vector que se usará en el experimento 2 y 4
     ABB abb;
     splayTree splay;
     for (int i = 0; i < N; i++)
     {
         int A_i = rand();
-        A.push_back(rand());
+        A.push_back(A_i);
 
         // Creamos los arboles e insertamos el valor A_i
         abb.insert(A_i);
@@ -626,17 +642,59 @@ void ejecutarExperimentos(int N, int M)
         }
 
         // Guardamos M * f(i) veces
+        double prob = f(i, N);
+        int s_i = floor(M * prob);
+        for (int j = 0; j < s_i; j++)
+        {
+            Bprob.push_back(A_i);
+        }
+    }
+
+    cout << "=== PREPARANDO ARBOLES 3 Y 4 ===" << endl;
+    // Ordenamos A para crear los arboles
+    vector<int> C = A; // C es el vector A ordenado
+    sort(C.begin(), C.end());
+
+    // Arboles Experimento 3 y 4:
+    // Se insertan los valores de A ordenados, es decir, el vector C
+    ABB abb2;
+    splayTree splay2;
+    for (int i = 0; i < N; i++)
+    {
+        abb2.insert(C[i]);
+        splay2.insert(C[i]);
     }
 
     // BUSQUEDA EXPERIMENTO 1
     vector<int> shuffle_B = B;
     shuffle(shuffle_B.begin(), shuffle_B.end(), default_random_engine(0));
-    Metrics metricaPrimerExp = busquedaPrimerExperimento(abb, splay, shuffle_B);
+    cout << "=== BUSQUEDA EXPERIMENTO 1 ===" << endl;
+    Metrics metricaPrimerExp = busquedaExperimento(abb, splay, shuffle_B);
 
     // BUSQUEDA EXPERIMENTO 2
+    vector<int> shuffle_B2 = Bprob;
+    shuffle(shuffle_B2.begin(), shuffle_B2.end(), default_random_engine(0));
+    cout << "=== BUSQUEDA EXPERIMENTO 2 ===" << endl;
+    Metrics metricaSegundoExp = busquedaExperimento(abb, splay, shuffle_B2);
+
+    // BUSQUEDA EXPERIMENTO 3
+    // Calcular B para el experimento 3
+    vector<int> B3 = generarVectorB(C, N, M);
+    vector<int> shuffle_B3 = B3;
+    shuffle(shuffle_B3.begin(), shuffle_B3.end(), default_random_engine(0));
+    cout << "=== BUSQUEDA EXPERIMENTO 3 ===" << endl;
+    Metrics metricaTercerExp = busquedaExperimento(abb2, splay2, shuffle_B3);
+
+    // BUSQUEDA EXPERIMENTO 4
+    vector<int> shuffle_B4 = Bprob;
+    shuffle(shuffle_B4.begin(), shuffle_B4.end(), default_random_engine(0));
+    cout << "=== BUSQUEDA EXPERIMENTO 4 ===" << endl;
+    Metrics metricaCuartoExp = busquedaExperimento(abb2, splay2, shuffle_B4);
+
+    return {metricaPrimerExp, metricaSegundoExp, metricaTercerExp, metricaCuartoExp};
 }
 
-int main()
+int oldMain()
 {
     // Crear TSV
     ofstream data_tsv;
@@ -660,6 +718,57 @@ int main()
 
         Metrics cuartoExp = cuartoExperimento(N, M);
         data_tsv << i << "\t" << N << "\t" << M << "\t" << cuartoExp.tiempoBusquedaABB << "\t" << cuartoExp.tiempoBusquedaSplay << "\n";
+    }
+
+    data_tsv.close();
+    printf("Finalizado\n");
+    return 0;
+}
+
+int main()
+{
+    // Crear TSV
+    ofstream data_tsv;
+    data_tsv.open("data.tsv");
+    data_tsv << "i\tN\tM\tnExperimento\ttiempoABB\ttiempoSplay\tcPromABB\tcPromSplay\n"; // TSV Header
+
+    // Ejecutar los experimentos
+    // desde 0.1 hasta 1
+    for (float i = 0.1; i <= 0.2; i += 0.1)
+    {
+        cout << "=== EJECUTANDO EXPERIMENTOS ITERACION " << i << " ===" << endl;
+
+        int N = pow(10, 6) * i;
+        int M = 100 * N;
+
+        vector<Metrics> resultados = ejecutarExperimentos(N, M);
+        // Primer experimento
+        double tABB = resultados[0].tiempoBusquedaABB;
+        double tSplay = resultados[0].tiempoBusquedaSplay;
+        double cPromABB = round(tABB / M * 100) / 100;
+        double cPromSplay = round(tSplay / M * 100) / 100;
+        data_tsv << i << "\t" << N << "\t" << M << "\t1\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
+
+        // Segundo experimento
+        tABB = resultados[1].tiempoBusquedaABB;
+        tSplay = resultados[1].tiempoBusquedaSplay;
+        cPromABB = round(tABB / M * 100) / 100;
+        cPromSplay = round(tSplay / M * 100) / 100;
+        data_tsv << i << "\t" << N << "\t" << M << "\t2\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
+
+        // Tercer experimento
+        tABB = resultados[2].tiempoBusquedaABB;
+        tSplay = resultados[2].tiempoBusquedaSplay;
+        cPromABB = round(tABB / M * 100) / 100;
+        cPromSplay = round(tSplay / M * 100) / 100;
+        data_tsv << i << "\t" << N << "\t" << M << "\t3\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
+
+        // Cuarto experimento
+        tABB = resultados[3].tiempoBusquedaABB;
+        tSplay = resultados[3].tiempoBusquedaSplay;
+        cPromABB = round(tABB / M * 100) / 100;
+        cPromSplay = round(tSplay / M * 100) / 100;
+        data_tsv << i << "\t" << N << "\t" << M << "\t4\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
     }
 
     data_tsv.close();

@@ -1,11 +1,16 @@
 #include <iostream>
 #include <chrono>
 #include <random>
-using namespace std;
 #include <vector>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <numeric>
+#include <iostream>
+#include <memory>
+#include <windows.h>
+
+using namespace std;
 
 // Estructura para las métricas del experimento
 struct Metrics
@@ -32,68 +37,78 @@ struct Node
     Node(int val) : value(val), left(nullptr), right(nullptr), parent(nullptr) {}
 };
 
+class ABBNodo
+{
+public:
+    int valor;
+    std::unique_ptr<ABBNodo> izquierda;
+    std::unique_ptr<ABBNodo> derecha;
+
+    ABBNodo(int val) : valor(val), izquierda(nullptr), derecha(nullptr) {}
+};
+
 class ABB
 {
 public:
-    ABB() : root(nullptr) {}
+    ABB() : raiz(nullptr) {}
 
-    void insert(int value)
+    void insertar(int valor)
     {
-        root = insert(root, value);
-    };
-    bool search(int value)
+        insertar(raiz, valor);
+    }
+
+    bool buscar(int valor) const
     {
-        return search(root, value);
-    };
-    void print()
+        return buscar(raiz, valor);
+    }
+
+    void imprimirInOrden() const
     {
-        print(root);
-    };
+        inOrden(raiz);
+        std::cout << std::endl;
+    }
 
 private:
-    Node *root;
-    Node *insert(Node *node, int value)
+    std::unique_ptr<ABBNodo> raiz;
+
+    // Función auxiliar para insertar un valor en el árbol
+    void insertar(std::unique_ptr<ABBNodo> &nodo, int valor)
     {
-        if (node == nullptr)
+        if (!nodo)
         {
-            return new Node(value);
+            nodo = std::make_unique<ABBNodo>(valor);
         }
-        if (value < node->value)
+        else if (valor < nodo->valor)
         {
-            node->left = insert(node->left, value);
+            insertar(nodo->izquierda, valor);
         }
-        else if (value > node->value)
+        else // Incluye el caso de duplicados aquí
         {
-            node->right = insert(node->right, value);
+            insertar(nodo->derecha, valor);
         }
-        return node;
     }
-    bool search(Node *node, int value)
+
+    // Función auxiliar para buscar un valor en el árbol
+    bool buscar(const std::unique_ptr<ABBNodo> &nodo, int valor) const
     {
-        if (node == nullptr)
-        {
+        if (!nodo)
             return false;
-        }
-        if (node->value == value)
-        {
+        if (valor == nodo->valor)
             return true;
-        }
-        if (value < node->value)
-        {
-            return search(node->left, value);
-        }
-        return search(node->right, value);
-    };
-    void print(Node *node)
+        if (valor < nodo->valor)
+            return buscar(nodo->izquierda, valor);
+        return buscar(nodo->derecha, valor);
+    }
+
+    // Función auxiliar para imprimir el árbol en orden
+    void inOrden(const std::unique_ptr<ABBNodo> &nodo) const
     {
-        if (node == nullptr)
-        {
+        if (!nodo)
             return;
-        }
-        print(node->left);
-        cout << node->value << " ";
-        print(node->right);
-    };
+        inOrden(nodo->izquierda);
+        std::cout << nodo->valor << " ";
+        inOrden(nodo->derecha);
+    }
 };
 
 class splayTree
@@ -223,7 +238,7 @@ private:
             node->left = leftChild;
             leftChild->parent = node;
         }
-        else if (value > node->value)
+        else if (value >= node->value)
         {
             Node *rightChild = insert(node->right, value);
             node->right = rightChild;
@@ -302,7 +317,7 @@ Metrics primerExperimento(int N, int M)
     auto start_insert_ABB = chrono::high_resolution_clock::now();
     for (int i = 0; i < N; i++)
     {
-        abb.insert(N_values[i]);
+        abb.insertar(N_values[i]);
     };
     auto end_insert_ABB = chrono::high_resolution_clock::now();
     cout << "Tiempo Insercion ABB Primer Experimento: "
@@ -312,7 +327,7 @@ Metrics primerExperimento(int N, int M)
     auto start_search_ABB = chrono::high_resolution_clock::now();
     for (int i = 0; i < M; i++)
     {
-        abb.search(M_values[i]);
+        abb.buscar(M_values[i]);
     }
     auto end_search_ABB = chrono::high_resolution_clock::now();
     auto tBusquedaABB = chrono::duration_cast<chrono::milliseconds>(end_search_ABB - start_search_ABB).count();
@@ -378,7 +393,7 @@ Metrics segundoExperimento(int N, int M)
     auto start_insert_ABB = chrono::high_resolution_clock::now();
     for (int i = 0; i < N; i++)
     {
-        abb.insert(N_values[i]);
+        abb.insertar(N_values[i]);
     }
     auto end_insert_ABB = chrono::high_resolution_clock::now();
     cout << "Tiempo segundo experimento insercion abb: "
@@ -388,7 +403,7 @@ Metrics segundoExperimento(int N, int M)
     auto start_search_ABB = chrono::high_resolution_clock::now();
     for (int i = 0; i < M; i++)
     {
-        abb.search(B[i]);
+        abb.buscar(B[i]);
     }
     auto end_search_ABB = chrono::high_resolution_clock::now();
     auto tBusquedaABB = chrono::duration_cast<chrono::milliseconds>(end_search_ABB - start_search_ABB).count();
@@ -460,7 +475,7 @@ Metrics tercerExperimento(int N, int M)
     auto start_insert_ABB = chrono::high_resolution_clock::now();
     for (int i = 0; i < N; i++)
     {
-        abb.insert(N_values[i]);
+        abb.insertar(N_values[i]);
     }
     auto end_insert_ABB = chrono::high_resolution_clock::now();
     cout << "Tiempo tercer experimento insert abb: "
@@ -470,7 +485,7 @@ Metrics tercerExperimento(int N, int M)
     auto start_search_ABB = chrono::high_resolution_clock::now();
     for (int i = 0; i < M_values.size(); i++)
     {
-        abb.search(M_values[i]);
+        abb.buscar(M_values[i]);
     }
     auto end_search_ABB = chrono::high_resolution_clock::now();
     auto tBusquedaABB = chrono::duration_cast<chrono::milliseconds>(end_search_ABB - start_search_ABB).count();
@@ -560,7 +575,7 @@ Metrics cuartoExperimento(int N, int M)
     auto start_insert_abb = chrono::high_resolution_clock::now();
     for (int i = 0; i < N; i++)
     {
-        abb.insert(C_values[i]);
+        abb.insertar(C_values[i]);
     }
     auto end_insert_abb = chrono::high_resolution_clock::now();
     cout << "Tiempo cuarto experimento: "
@@ -570,7 +585,7 @@ Metrics cuartoExperimento(int N, int M)
     auto start_search_abb = chrono::high_resolution_clock::now();
     for (int i = 0; i < M_values.size(); i++)
     {
-        abb.search(M_values[i]);
+        abb.buscar(M_values[i]);
     }
     auto end_search_abb = chrono::high_resolution_clock::now();
     auto tBusquedaABB = chrono::duration_cast<chrono::milliseconds>(end_search_abb - start_search_abb).count();
@@ -579,6 +594,24 @@ Metrics cuartoExperimento(int N, int M)
          << " ms" << endl;
 
     return guardarMetricas(tBusquedaABB, tBusquedaSplay);
+}
+
+// Funcion auxiliar para crear un vector de enteros únicos
+vector<int> generar_enteros_unicos(int N)
+{
+    std::vector<int> numeros(N);
+
+    // Llenar el vector con números únicos [0, 1, 2, ..., N-1]
+    std::iota(numeros.begin(), numeros.end(), 0);
+
+    // Configurar el generador de números aleatorios
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Mezclar el vector aleatoriamente
+    std::shuffle(numeros.begin(), numeros.end(), gen);
+
+    return numeros;
 }
 
 // Funcion auxiliar para crear el vector B de la forma M/N
@@ -595,18 +628,26 @@ vector<int> generarVectorB(vector<int> A, int N, int M)
     return B;
 }
 
-Metrics busquedaExperimento(ABB abb, splayTree splay, vector<int> B)
+Metrics busquedaExperimento(ABB &abb, splayTree splay, vector<int> B)
 {
+    int size = B.size();
+
     auto start_search_ABB = chrono::high_resolution_clock::now();
-    for (int i = 0; i < B.size(); i++)
+    for (int i = 0; i < size; i++)
     {
-        abb.search(B[i]);
+        // Mostrar el progreso en incrementos del 10%
+        if (size > 0 && (i % (size / 10)) == 0)
+        {
+            int porcentaje = (i * 100) / size;
+            cout << "Busqueda ABB: " << porcentaje << "% completada (" << i << " de " << size << ")" << endl;
+        }
+        abb.buscar(B[i]);
     }
     auto end_search_ABB = chrono::high_resolution_clock::now();
     auto tBusquedaABB = chrono::duration_cast<chrono::milliseconds>(end_search_ABB - start_search_ABB).count();
 
     auto start_search_splay = chrono::high_resolution_clock::now();
-    for (int i = 0; i < B.size(); i++)
+    for (int i = 0; i < size; i++)
     {
         splay.search(B[i]);
     }
@@ -626,19 +667,19 @@ vector<Metrics> ejecutarExperimentos(int N, int M)
     vector<int> Bprob; // Bprob es el vector que se usará en el experimento 2 y 4
     ABB abb;
     splayTree splay;
+
+    // Generar N valores aleatorios y se insertan en A
+    A = generar_enteros_unicos(N);
     for (int i = 0; i < N; i++)
     {
-        int A_i = rand();
-        A.push_back(A_i);
-
         // Creamos los arboles e insertamos el valor A_i
-        abb.insert(A_i);
-        splay.insert(A_i);
+        abb.insertar(A[i]);
+        splay.insert(A[i]);
 
         // Guardamos M/N copias de A_i en B
         for (int j = 0; j < M / N; j++)
         {
-            B.push_back(A_i);
+            B.push_back(A[i]);
         }
 
         // Guardamos M * f(i) veces
@@ -646,22 +687,36 @@ vector<Metrics> ejecutarExperimentos(int N, int M)
         int s_i = floor(M * prob);
         for (int j = 0; j < s_i; j++)
         {
-            Bprob.push_back(A_i);
+            Bprob.push_back(A[i]);
         }
     }
 
-    cout << "=== PREPARANDO ARBOLES 3 Y 4 ===" << endl;
-    // Ordenamos A para crear los arboles
     vector<int> C = A; // C es el vector A ordenado
     sort(C.begin(), C.end());
+    // Validar datos:
+    // 1. A no tiene elementos repetidos
+    // 2. B tiene M elementos
+    // 3. Bprob tiene M elementos
+    // En caso de que no se cumpla alguna de las condiciones, se detiene el programa
+    if (unique(C.begin(), C.end()) != C.end())
+    {
+        cout << "Error: A tiene elementos repetidos" << endl;
+        exit(1);
+    }
+    if (B.size() != M)
+    {
+        cout << "Error: B no tiene M elementos:" << B.size() << endl;
+        exit(1);
+    }
 
+    cout << "=== PREPARANDO ARBOLES 3 Y 4 ===" << endl;
     // Arboles Experimento 3 y 4:
     // Se insertan los valores de A ordenados, es decir, el vector C
     ABB abb2;
     splayTree splay2;
     for (int i = 0; i < N; i++)
     {
-        abb2.insert(C[i]);
+        abb2.insertar(C[i]);
         splay2.insert(C[i]);
     }
 
@@ -734,7 +789,7 @@ int main()
 
     // Ejecutar los experimentos
     // desde 0.1 hasta 1
-    for (float i = 0.1; i <= 0.2; i += 0.1)
+    for (float i = 0.2; i <= 0.4; i += 0.1)
     {
         cout << "=== EJECUTANDO EXPERIMENTOS ITERACION " << i << " ===" << endl;
 
@@ -745,29 +800,29 @@ int main()
         // Primer experimento
         double tABB = resultados[0].tiempoBusquedaABB;
         double tSplay = resultados[0].tiempoBusquedaSplay;
-        double cPromABB = round(tABB / M * 100) / 100;
-        double cPromSplay = round(tSplay / M * 100) / 100;
+        double cPromABB = tABB / M;
+        double cPromSplay = tSplay / M;
         data_tsv << i << "\t" << N << "\t" << M << "\t1\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
 
         // Segundo experimento
         tABB = resultados[1].tiempoBusquedaABB;
         tSplay = resultados[1].tiempoBusquedaSplay;
-        cPromABB = round(tABB / M * 100) / 100;
-        cPromSplay = round(tSplay / M * 100) / 100;
+        cPromABB = tABB / M;
+        cPromSplay = tSplay / M;
         data_tsv << i << "\t" << N << "\t" << M << "\t2\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
 
         // Tercer experimento
         tABB = resultados[2].tiempoBusquedaABB;
         tSplay = resultados[2].tiempoBusquedaSplay;
-        cPromABB = round(tABB / M * 100) / 100;
-        cPromSplay = round(tSplay / M * 100) / 100;
+        cPromABB = tABB / M;
+        cPromSplay = tSplay / M;
         data_tsv << i << "\t" << N << "\t" << M << "\t3\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
 
         // Cuarto experimento
         tABB = resultados[3].tiempoBusquedaABB;
         tSplay = resultados[3].tiempoBusquedaSplay;
-        cPromABB = round(tABB / M * 100) / 100;
-        cPromSplay = round(tSplay / M * 100) / 100;
+        cPromABB = tABB / M;
+        cPromSplay = tSplay / M;
         data_tsv << i << "\t" << N << "\t" << M << "\t4\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
     }
 

@@ -320,7 +320,14 @@ double busquedaABB(ABB &abb, vector<int> A, unordered_map<int, int> ponderacion)
         auto start_search_ABB = chrono::high_resolution_clock::now();
         abb.buscar(A[i]);
         auto end_search_ABB = chrono::high_resolution_clock::now();
-        auto tBusquedaABB = chrono::duration_cast<chrono::milliseconds>(end_search_ABB - start_search_ABB).count();
+        auto tBusquedaABB = chrono::duration_cast<chrono::microseconds>(end_search_ABB - start_search_ABB).count();
+
+        if (tBusquedaABB == 0)
+        {
+            tBusquedaABB = 1;
+        }
+
+        // cout << "microt: " << tBusquedaABB << " ms" << endl;
         tiempoTotal += tBusquedaABB * ponderacion[A[i]];
 
         // Mostrar el progreso en incrementos del 10%
@@ -331,7 +338,8 @@ double busquedaABB(ABB &abb, vector<int> A, unordered_map<int, int> ponderacion)
         }
     }
 
-    return tiempoTotal;
+    // Entregamos el tiempo total en milisegundos
+    return tiempoTotal / 1000;
 }
 
 Metrics busquedaExperimento(ABB &abb, splayTree splay, vector<int> A, vector<int> B, unordered_map<int, int> ponderacion)
@@ -340,6 +348,7 @@ Metrics busquedaExperimento(ABB &abb, splayTree splay, vector<int> A, vector<int
 
     // Realizar las busquedas en el ABB
     double tBusquedaABB = busquedaABB(abb, A, ponderacion);
+    cout << "Tiempo total de busqueda ABB: " << tBusquedaABB << " ms" << endl;
 
     auto start_search_splay = chrono::high_resolution_clock::now();
     for (int i = 0; i < size; i++)
@@ -457,47 +466,32 @@ int main()
     ofstream data_tsv;
     data_tsv.open("data.tsv");
     data_tsv << "i\tN\tM\tnExperimento\ttiempoABB\ttiempoSplay\tcPromABB\tcPromSplay\n"; // TSV Header
+    data_tsv.close();
 
     // Ejecutar los experimentos
     // desde 0.1 hasta 1
-    for (float i = 0.2; i <= 0.3; i += 0.1)
+    for (float i = 0.1; i <= 0.3; i += 0.1)
     {
+        data_tsv.open("data.tsv", ios::app);
         cout << "=== EJECUTANDO EXPERIMENTOS ITERACION " << i << " ===" << endl;
 
         int N = pow(10, 6) * i;
         int M = 100 * N;
 
         vector<Metrics> resultados = ejecutarExperimentos(N, M);
-        // Primer experimento
-        double tABB = resultados[0].tiempoBusquedaABB;
-        double tSplay = resultados[0].tiempoBusquedaSplay;
-        double cPromABB = tABB / M;
-        double cPromSplay = tSplay / M;
-        data_tsv << i << "\t" << N << "\t" << M << "\t1\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
 
-        // Segundo experimento
-        tABB = resultados[1].tiempoBusquedaABB;
-        tSplay = resultados[1].tiempoBusquedaSplay;
-        cPromABB = tABB / M;
-        cPromSplay = tSplay / M;
-        data_tsv << i << "\t" << N << "\t" << M << "\t2\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
-
-        // Tercer experimento
-        tABB = resultados[2].tiempoBusquedaABB;
-        tSplay = resultados[2].tiempoBusquedaSplay;
-        cPromABB = tABB / M;
-        cPromSplay = tSplay / M;
-        data_tsv << i << "\t" << N << "\t" << M << "\t3\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
-
-        // Cuarto experimento
-        tABB = resultados[3].tiempoBusquedaABB;
-        tSplay = resultados[3].tiempoBusquedaSplay;
-        cPromABB = tABB / M;
-        cPromSplay = tSplay / M;
-        data_tsv << i << "\t" << N << "\t" << M << "\t4\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
+        // Guardar los resultados en el archivo TSV
+        for (int j = 0; j < 4; j++)
+        {
+            double tABB = resultados[j].tiempoBusquedaABB;
+            double tSplay = resultados[j].tiempoBusquedaSplay;
+            double cPromABB = tABB / M;
+            double cPromSplay = tSplay / M;
+            data_tsv << i << "\t" << N << "\t" << M << "\t" << j << "\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
+        }
+        data_tsv.close();
     }
 
-    data_tsv.close();
     printf("Finalizado\n");
     return 0;
 }

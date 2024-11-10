@@ -8,7 +8,7 @@
 #include <numeric>
 #include <iostream>
 #include <memory>
-#include <windows.h>
+#include <unordered_map>
 
 using namespace std;
 
@@ -628,23 +628,37 @@ vector<int> generarVectorB(vector<int> A, int N, int M)
     return B;
 }
 
-Metrics busquedaExperimento(ABB &abb, splayTree splay, vector<int> B)
+double busquedaABB(ABB &abb, vector<int> A, unordered_map<int, int> ponderacion)
 {
-    int size = B.size();
+    double tiempoTotal = 0;
 
-    auto start_search_ABB = chrono::high_resolution_clock::now();
+    int size = A.size();
     for (int i = 0; i < size; i++)
     {
+
+        auto start_search_ABB = chrono::high_resolution_clock::now();
+        abb.buscar(A[i]);
+        auto end_search_ABB = chrono::high_resolution_clock::now();
+        auto tBusquedaABB = chrono::duration_cast<chrono::milliseconds>(end_search_ABB - start_search_ABB).count();
+        tiempoTotal += tBusquedaABB * ponderacion[A[i]];
+
         // Mostrar el progreso en incrementos del 10%
         if (size > 0 && (i % (size / 10)) == 0)
         {
             int porcentaje = (i * 100) / size;
             cout << "Busqueda ABB: " << porcentaje << "% completada (" << i << " de " << size << ")" << endl;
         }
-        abb.buscar(B[i]);
     }
-    auto end_search_ABB = chrono::high_resolution_clock::now();
-    auto tBusquedaABB = chrono::duration_cast<chrono::milliseconds>(end_search_ABB - start_search_ABB).count();
+
+    return tiempoTotal;
+}
+
+Metrics busquedaExperimento(ABB &abb, splayTree splay, vector<int> A, vector<int> B, unordered_map<int, int> ponderacion)
+{
+    int size = B.size();
+
+    // Realizar las busquedas en el ABB
+    double tBusquedaABB = busquedaABB(abb, A, ponderacion);
 
     auto start_search_splay = chrono::high_resolution_clock::now();
     for (int i = 0; i < size; i++)
@@ -668,6 +682,9 @@ vector<Metrics> ejecutarExperimentos(int N, int M)
     ABB abb;
     splayTree splay;
 
+    unordered_map<int, int> ponderacionABBConst;
+    unordered_map<int, int> ponderacionABBProb;
+
     // Generar N valores aleatorios y se insertan en A
     A = generar_enteros_unicos(N);
     for (int i = 0; i < N; i++)
@@ -689,6 +706,10 @@ vector<Metrics> ejecutarExperimentos(int N, int M)
         {
             Bprob.push_back(A[i]);
         }
+
+        // Guardamos la ponderacion de A_i
+        ponderacionABBConst[A[i]] = M / N;
+        ponderacionABBProb[A[i]] = s_i;
     }
 
     vector<int> C = A; // C es el vector A ordenado
@@ -724,13 +745,13 @@ vector<Metrics> ejecutarExperimentos(int N, int M)
     vector<int> shuffle_B = B;
     shuffle(shuffle_B.begin(), shuffle_B.end(), default_random_engine(0));
     cout << "=== BUSQUEDA EXPERIMENTO 1 ===" << endl;
-    Metrics metricaPrimerExp = busquedaExperimento(abb, splay, shuffle_B);
+    Metrics metricaPrimerExp = busquedaExperimento(abb, splay, A, shuffle_B, ponderacionABBConst);
 
     // BUSQUEDA EXPERIMENTO 2
     vector<int> shuffle_B2 = Bprob;
     shuffle(shuffle_B2.begin(), shuffle_B2.end(), default_random_engine(0));
     cout << "=== BUSQUEDA EXPERIMENTO 2 ===" << endl;
-    Metrics metricaSegundoExp = busquedaExperimento(abb, splay, shuffle_B2);
+    Metrics metricaSegundoExp = busquedaExperimento(abb, splay, A, shuffle_B2, ponderacionABBProb);
 
     // BUSQUEDA EXPERIMENTO 3
     // Calcular B para el experimento 3
@@ -738,13 +759,13 @@ vector<Metrics> ejecutarExperimentos(int N, int M)
     vector<int> shuffle_B3 = B3;
     shuffle(shuffle_B3.begin(), shuffle_B3.end(), default_random_engine(0));
     cout << "=== BUSQUEDA EXPERIMENTO 3 ===" << endl;
-    Metrics metricaTercerExp = busquedaExperimento(abb2, splay2, shuffle_B3);
+    Metrics metricaTercerExp = busquedaExperimento(abb2, splay2, A, shuffle_B3, ponderacionABBConst);
 
     // BUSQUEDA EXPERIMENTO 4
     vector<int> shuffle_B4 = Bprob;
     shuffle(shuffle_B4.begin(), shuffle_B4.end(), default_random_engine(0));
     cout << "=== BUSQUEDA EXPERIMENTO 4 ===" << endl;
-    Metrics metricaCuartoExp = busquedaExperimento(abb2, splay2, shuffle_B4);
+    Metrics metricaCuartoExp = busquedaExperimento(abb2, splay2, A, shuffle_B4, ponderacionABBProb);
 
     return {metricaPrimerExp, metricaSegundoExp, metricaTercerExp, metricaCuartoExp};
 }
@@ -789,7 +810,7 @@ int main()
 
     // Ejecutar los experimentos
     // desde 0.1 hasta 1
-    for (float i = 0.2; i <= 0.4; i += 0.1)
+    for (float i = 0.1; i <= 0.2; i += 0.1)
     {
         cout << "=== EJECUTANDO EXPERIMENTOS ITERACION " << i << " ===" << endl;
 

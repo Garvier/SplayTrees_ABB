@@ -470,7 +470,7 @@ int main()
 
     // Ejecutar los experimentos
     // desde 0.1 hasta 1
-    for (float i = 0.1; i <= 0.3; i += 0.1)
+    for (float i = 0.3; i < 0.4; i += 0.1)
     {
         data_tsv.open("data.tsv", ios::app);
         cout << "=== EJECUTANDO EXPERIMENTOS ITERACION " << i << " ===" << endl;
@@ -487,7 +487,7 @@ int main()
             double tSplay = resultados[j].tiempoBusquedaSplay;
             double cPromABB = tABB / M;
             double cPromSplay = tSplay / M;
-            data_tsv << i << "\t" << N << "\t" << M << "\t" << j << "\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
+            data_tsv << i << "\t" << N << "\t" << M << "\t" << j + 1 << "\t" << tABB << "\t" << tSplay << "\t" << cPromABB << "\t" << cPromSplay << "\n";
         }
         data_tsv.close();
     }

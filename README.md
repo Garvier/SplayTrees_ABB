@@ -1,40 +1,33 @@
 # Tarea 2 - Splay Trees y ABB's
 
-Esta tarea implementa un Splay Trees y un ABB's en C++, ...
+Esta tarea implementa un Splay Trees y un ABB's en C++.
 
 ## Requisitos
 
-- [C++17 o superior](https://en.cppreference.com/w/cpp/filesystem).
+- C++17 o superior (Para no tener problema con las librerias)
 
 ## Estructura del proyecto
 
-La totalidad del codigo se encuentra dentro de `main.cpp`
+La totalidad del codigo se encuentra dentro de `T2.cpp`
 
 ## Configuración
 
-La función `main()` que ejecuta los experimentos se encuentra dentro de `main.cpp`.
+La función `main()` que ejecuta los experimentos se encuentra dentro de `T2.cpp`.
 
-Dentro de `main.cpp` podemos configurar principalmente las variaciones del parametro $C_{max}$ y la cantidad de puntos con las que se va a ejecutar.
+Dentro de `T2.cpp` podemos configurar principalmente las variaciones del parametro i, el cual corresponde
+al porcentaje de puntos que se tomaran respecto a $10^6$.
 
 Por defecto `main()` viene configurado de la siguiente forma:
 
-- $C_{max}$
+
+- Cantidad de puntos $10^6 \cdot i$. 
+  
+Con $i \in \{0.1, ..., 1.0\}$
 
 ```c++
-ll C_MAX_values[] = {10, 100, 500, 750, 1024, 2056, 5000, 10000};
+for (float i = 0.1; i <= 1; i += 0.1)
 ```
 
-- Cantidad de puntos $2^i$
-
-```c++
-for(int i=10; i < 25; i++)
-```
-
-Si se quisiese cambiar el rango en el cual se generan los valores aleatorios a insertar, se debe modificar la funcion `experimento2()`. Que por defecto genera valores aleatorios de 64bits entre $[1,  2^{64}-1]$
-
-```c++
-uniform_int_distribution<ll> dis(1, numeric_limits<long long>::max());
-```
 
 > [!NOTE]
 > Todos estos valores por defecto, son los mismos pedidos en el enunciado de la tarea.
@@ -79,4 +72,4 @@ $ main.exe
 
 ## Experimentos
 
-Al ejecutar los experimentos, se genera un archivo `.tsv` en el directorio `/experiments_data` que contiene diversas metricas calculadas durante el experimento. Adicionalmente, dentro de `/experiments_data/data_grupo` se pueden encontrar los datos obtenidos por el equipo con la configuración por defecto.
+Al ejecutar los experimentos, se genera un archivo `data.tsv` en el directorio raiz del proyecto. Este contiene diversas metricas calculadas durante el experimento. Adicionalmente, dentro de `/experiments_data/` se pueden encontrar los datos obtenidos por el equipo.

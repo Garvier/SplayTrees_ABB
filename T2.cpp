@@ -109,7 +109,7 @@ public:
 
     bool search(int value)
     {
-        Node* result = search(root, value);
+        Node *result = search(root, value);
         if (result != nullptr)
         {
             root = splay(root, value); // Realizar splay si se encuentra el valor
@@ -132,9 +132,9 @@ private:
     Node *root;
 
     // Método para rotación hacia la derecha
-    Node* rightRotate(Node* y)
+    Node *rightRotate(Node *y)
     {
-        Node* x = y->left;
+        Node *x = y->left;
         y->left = x->right;
         if (x->right != nullptr)
             x->right->parent = y;
@@ -146,9 +146,9 @@ private:
     }
 
     // Método para rotación hacia la izquierda
-    Node* leftRotate(Node* x)
+    Node *leftRotate(Node *x)
     {
-        Node* y = x->right;
+        Node *y = x->right;
         x->right = y->left;
         if (y->left != nullptr)
             y->left->parent = x;
@@ -160,7 +160,7 @@ private:
     }
 
     // Método de splay modificado
-    Node* splay(Node* root, int key)
+    Node *splay(Node *root, int key)
     {
         // Caso base: si root es nulo o la clave ya está en root
         if (root == nullptr || root->value == key)
@@ -213,26 +213,26 @@ private:
         }
     }
 
-    Node* insert(Node* node, int value)
+    Node *insert(Node *node, int value)
     {
         if (node == nullptr)
             return new Node(value);
         if (value < node->value)
         {
-            Node* leftChild = insert(node->left, value);
+            Node *leftChild = insert(node->left, value);
             node->left = leftChild;
             leftChild->parent = node;
         }
         else if (value > node->value)
         {
-            Node* rightChild = insert(node->right, value);
+            Node *rightChild = insert(node->right, value);
             node->right = rightChild;
             rightChild->parent = node;
         }
         return node;
     }
 
-    Node* search(Node* node, int value)
+    Node *search(Node *node, int value)
     {
         if (node == nullptr || node->value == value)
             return node;
@@ -241,7 +241,7 @@ private:
         return search(node->right, value);
     }
 
-    void print(Node* node)
+    void print(Node *node)
     {
         if (node == nullptr)
             return;
@@ -250,7 +250,6 @@ private:
         print(node->right);
     }
 };
-
 
 double f(int i, int N)
 {
@@ -590,8 +589,7 @@ int main()
     data_tsv << "i\tN\tM\ttiempoABB\ttiempoSplay\n"; // TSV Header
 
     // Ejecuta la experimentación en ambos árboles
-    // falta generar los N y el calculo de las ejecuciones de cada una
-    for (float i = 0.1; i <= 0.2; i += 0.1)
+    for (float i = 0.1; i <= 1; i += 0.1)
     {
         int N = pow(10, 6) * i;
         int M = 100 * N;
